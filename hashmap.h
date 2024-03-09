@@ -16,17 +16,7 @@ public:
     
     //TODO: IMPLEMENT
     // destructor; deletes all of the items in the hashmap
-    ~HashMap(){
-        for(int i = 0; i < buckets.size(); i++){
-            if(!buckets[i].empty())
-            for(typename std::list<Node*>::iterator it = traversal.begin(); it != traversal.end(); it++){
-                delete (*it);
-                it = traversal.erase(it);
-            }
-        }
-        buckets.clear();
-        traversal.clear();
-    }
+    ~HashMap(){}
     
     // return the number of associations in the hashmap
     int size() const{
@@ -56,13 +46,15 @@ public:
         if(find(key) == nullptr){ insert(key, T()); }
         
         int index = hash(key) % buckets.size();
-        typename std::list<Node*>::iterator it;
+        
+        typename std::list<Node>::iterator it;
+        
         for(it = buckets[index].begin(); it != buckets[index].end(); it++){
-            if((*it)->first == key){
+            if(it->first == key){
                 break;
             }
         }
-        return (*it)->second;
+        return it->second;
     }
     
 private:
@@ -76,37 +68,24 @@ private:
     };
     
     double m_nElements, m_maxLoad;
-    std::vector<std::list<Node*>> buckets;
     
-    std::list<Node*> traversal;
-    
+    std::vector<std::list<Node>> buckets;
+        
     size_t hash(const std::string &key) const { return std::hash<std::string>()(key); }
     
     
     void rehash(){
-        std::vector<std::list<Node*>> newBuckets (buckets.size()*2);
-        std::list<Node*> newTraversal;
+        std::vector<std::list<Node>> newBuckets (buckets.size()*2);
         
-        for(typename std::list<Node*>::iterator it = traversal.begin(); it != traversal.end(); it++){
-            int index = hash((*it)->first) % newBuckets.size();
-            Node *n = new Node((*it)->first, (*it)->second);
-            newBuckets[index].push_back(n);
-            newTraversal.push_back(n);
-
-        }
-        
-        swap(buckets, newBuckets);
-        swap(traversal, newTraversal);
-
-        for(int i = 0; i < newBuckets.size(); i++){
-            if(!newBuckets[i].empty())
-            for(typename std::list<Node*>::iterator it = newTraversal.begin(); it != newTraversal.end(); it++){
-                delete (*it);
-                it = newTraversal.erase(it);
+        for(int i = 0; i < buckets.size(); i++){
+            if(!buckets[i].empty()){
+                for(typename std::list<Node>::iterator it = buckets[i].begin(); it != buckets[i].end(); it++){
+                    int index = hash(it->first) % newBuckets.size();
+                    newBuckets[index].push_back(Node(it->first, it->second));
+                }
             }
         }
-        newBuckets.clear();
-        newTraversal.clear();
+        std::swap(buckets, newBuckets);
     }
     
 };
@@ -118,11 +97,11 @@ T* HashMap<T>::find(const std::string& key)
     
     if(buckets[index].empty()) return nullptr;
     
-    typename std::list<Node*>::iterator it;
+    typename std::list<Node>::iterator it;
         
     for(it = buckets[index].begin(); it != buckets[index].end(); it++){
-        if((*it)->first == key){
-            return &((*it)->second);
+        if(it->first == key){
+            return &(it->second);
         }
     }
     
@@ -140,9 +119,7 @@ void HashMap<T>::insert(const std::string& key, const T& value)
     int index = hash(key) % buckets.size();
     
     if(ptr == nullptr){
-        Node *n = new Node(key, value);
-        buckets[index].push_back(n);
-        traversal.push_back(n);
+        buckets[index].push_back(Node(key, value));
         m_nElements++;
         return;
     }
