@@ -16,11 +16,12 @@ public:
 private:
     
     struct AStarNode{
-        GeoPoint node;
+        GeoPoint geoPt;
         double aStarValue;
         double lengthToNode;
     };
     
+    const GeoDatabaseBase *m_gdb;
     //HashMap<GeoPoint> visitedPoints;
 
     //std::vector<AStarNode> possPaths;
@@ -36,7 +37,7 @@ private:
             if(vec[mid].aStarValue + vec[mid].lengthToNode == n.aStarValue + n.lengthToNode)
                 return mid;
             
-            if(n.aStarValue + n.lengthToNode < vec[mid].aStarValue + vec[mid].lengthToNode){
+            if(n.aStarValue + n.lengthToNode > vec[mid].aStarValue + vec[mid].lengthToNode){
                 max = mid - 1;
             }
             else
