@@ -108,23 +108,28 @@ std::string GeoDatabase::get_street_name(const GeoPoint& pt1, const GeoPoint& pt
         return *pointToStreet.find(pt1.to_string() + pt2.to_string());
     else if(pointToStreet.find(pt2.to_string() + pt1.to_string()) != nullptr)
         return *pointToStreet.find(pt2.to_string() + pt1.to_string());
-    if(pointToStreet.find(pt1.to_string()) != nullptr) {}
-       // return *pointToStreet.find(pt1.to_string());
-    if(pointToStreet.find(pt2.to_string()) != nullptr)
-        return *pointToStreet.find(pt2.to_string());
+    else if(pointToStreet.find(pt1.to_string()) != nullptr || pointToStreet.find(pt2.to_string()) != nullptr){
+        if((pointToStreet.find(pt1.to_string()) != nullptr && *pointToStreet.find(pt1.to_string()) == "a path") || (pointToStreet.find(pt2.to_string()) != nullptr && *pointToStreet.find(pt2.to_string()) == "a path"))
+            return "a path";
+        else if(pointToStreet.find(pt1.to_string()) != nullptr)
+                return *pointToStreet.find(pt1.to_string());
+        else
+            return *pointToStreet.find(pt2.to_string());
+    }
     else return "";
-    return "";
 }
 
 std::vector<GeoPoint> GeoDatabase::get_connected_points(const GeoPoint& pt) const
 {
+    if(pointToNode.find(pt.to_string()) == nullptr) return std::vector<GeoPoint>();
+    
     const graphNode *ptVal = pointToNode.find(pt.to_string());
     const std::vector<graphNode*> connectedPoints = ptVal->connectedPts;
-    std::vector<GeoPoint> geoPtVector;
+    std::vector<GeoPoint> geoPts;
     for(vector<graphNode*>::const_iterator it = connectedPoints.begin(); it != connectedPoints.end(); it++){
-        geoPtVector.push_back((*it)->val);
+        geoPts.push_back((*it)->val);
     }
-    return geoPtVector;
+    return geoPts;
 }
 
 

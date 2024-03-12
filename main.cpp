@@ -5,9 +5,11 @@
 #include <vector>
 
 #include "geodb.h"
+
 #include "router.h"
 #include "stops.h"
 #include "tour_generator.h"
+
 #include "hashmap.h"
 #include <cassert>
 
@@ -16,32 +18,59 @@ using namespace std;
 int main(){
     GeoDatabase gdb = GeoDatabase();
     gdb.load("/Users/carolinewei/Downloads/mapdata.txt");
+    /*
+    GeoPoint p1("34.0601422", "-118.4468929");
+        GeoPoint p2("34.0600768", "-118.4467216");
+        assert(gdb.get_street_name(p1, p2)=="a path");
+        assert(gdb.get_street_name(p2, p1)=="a path");
+        
+        GeoPoint geopoints[4] = {GeoPoint("34.0602175","-118.4464952"), GeoPoint("34.0599361","-118.4469479"), GeoPoint("34.0601422","-118.4468929"), GeoPoint("34.0591552","-118.4463759")};
+        GeoPoint p = GeoPoint("34.0600768", "-118.4467216");
+        std::vector<GeoPoint> pts = gdb.get_connected_points(p);
+    */
+    GeoPoint poiPoint;
+    gdb.get_poi_location("Ackerman Union", poiPoint);
+    assert(poiPoint.to_string() == "34.0705851,-118.4439429");
     
     GeoPoint poiLoc;
     gdb.get_poi_location("Diddy Riese", poiLoc);
     cout << "POI Loc: "<< poiLoc.to_string()<<endl;
     
-    /*
-    GeoPoint pt1 = GeoPoint("34.0632405" , "-118.4470467");
-    GeoPoint pt2 = GeoPoint("34.0625329" , "-118.4470263");
-    cout<<"street name: "<<gdb.get_street_name(pt1, pt2)<<endl;
-    */
-    
     GeoPoint p1("34.0732851", "-118.4931016");
     GeoPoint p2("34.0736122", "-118.4927669");
-    cout << "street name: " << gdb.get_street_name(p1, p2) <<endl; // writes "Glenmere Way"
+    cout<<gdb.get_street_name(p1, p2)<<endl;
+    //assert( gdb.get_street_name(p1, p2) == "Glenmere Way"); // writes "Glenmere Way"
     assert(gdb.get_street_name(p2, p1) == "Glenmere Way"); // writes "Glenmere Way"
     
     GeoPoint p3("34.0601422", "-118.4468929");
     GeoPoint p4("34.0600768", "-118.4467216");
-    //assert(gdb.get_street_name(p3, p4) == "a path"); // writes "a path"
-    //assert(gdb.get_street_name(p4, p3) == "a path"); // writes "a path"
-    cout <<gdb.get_street_name(p4, p3)<<endl;
+    assert(gdb.get_street_name(p3, p4) == "a path"); // writes "a path"
+    assert(gdb.get_street_name(p4, p3) == "a path"); // writes "a path"
 
     GeoPoint p5("34.0602175", "-118.4464952");
     GeoPoint p6("34.0600768", "-118.4467216");
     assert(gdb.get_street_name(p5, p6) == "Kinross Avenue"); // writes "Kinross Avenue"
     assert(gdb.get_street_name(p6, p5) == "Kinross Avenue"); // writes "Kinross Avenue
+    
+    //cout<<"check connected points:"<<endl;
+    
+    std::vector<GeoPoint> pts = gdb.get_connected_points(GeoPoint("34.0736122", "-118.4927669"));
+    /*
+    if (pts.empty())
+      cout << "There are no points connected to your specified point\n";
+  else {
+  for (const auto p: pts)
+        cout << p.sLatitude << ", "  << p.sLongitude << endl;
+    }
+     */
+    
+    cout << pts.size()<<endl;
+      if (pts.empty())
+        cout << "There are no points connected to your specified point\n";
+    else {
+    for (const auto p: pts)
+          cout << p.sLatitude << ", "  << p.sLongitude << endl;
+      }
     
     cout<<"finished"<<endl;
 
