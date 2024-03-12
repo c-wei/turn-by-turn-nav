@@ -14,6 +14,38 @@
 using namespace std;
 
 int main(){
+    GeoDatabase gdb = GeoDatabase();
+    gdb.load("/Users/carolinewei/Downloads/mapdata.txt");
+    
+    GeoPoint poiLoc;
+    gdb.get_poi_location("Diddy Riese", poiLoc);
+    cout << "POI Loc: "<< poiLoc.to_string()<<endl;
+    
+    /*
+    GeoPoint pt1 = GeoPoint("34.0632405" , "-118.4470467");
+    GeoPoint pt2 = GeoPoint("34.0625329" , "-118.4470263");
+    cout<<"street name: "<<gdb.get_street_name(pt1, pt2)<<endl;
+    */
+    
+    GeoPoint p1("34.0732851", "-118.4931016");
+    GeoPoint p2("34.0736122", "-118.4927669");
+    cout << "street name: " << gdb.get_street_name(p1, p2) <<endl; // writes "Glenmere Way"
+    assert(gdb.get_street_name(p2, p1) == "Glenmere Way"); // writes "Glenmere Way"
+    
+    GeoPoint p3("34.0601422", "-118.4468929");
+    GeoPoint p4("34.0600768", "-118.4467216");
+    //assert(gdb.get_street_name(p3, p4) == "a path"); // writes "a path"
+    //assert(gdb.get_street_name(p4, p3) == "a path"); // writes "a path"
+    cout <<gdb.get_street_name(p4, p3)<<endl;
+
+    GeoPoint p5("34.0602175", "-118.4464952");
+    GeoPoint p6("34.0600768", "-118.4467216");
+    assert(gdb.get_street_name(p5, p6) == "Kinross Avenue"); // writes "Kinross Avenue"
+    assert(gdb.get_street_name(p6, p5) == "Kinross Avenue"); // writes "Kinross Avenue
+    
+    cout<<"finished"<<endl;
+
+}
     /*
     HashMap<int> hashmap(0.5);
     std::string keys[10] = {"ahello", "bhello", "chello", "dhello", "ehello", "fhello","ghello", "hhello", "ihello", "jhello"};

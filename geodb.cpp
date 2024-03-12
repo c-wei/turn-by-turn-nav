@@ -16,16 +16,20 @@ bool GeoDatabase::load(const std::string& map_data_file){
     std::string streetName;
     
     while(getline(infile, streetName)){
-        double geoPtSLat, geoPtSLon, geoPtELat, geoPtELon;
+        string geoPtSLat, geoPtSLon, geoPtELat, geoPtELon;
         infile >> geoPtSLat;
         infile >> geoPtSLon;
         infile >> geoPtELat;
         infile >> geoPtELon;
         infile.ignore(10000, '\n');
         
-        GeoPoint start = GeoPoint(std::to_string(geoPtSLat), std::to_string(geoPtSLon));
-        GeoPoint end = GeoPoint(std::to_string(geoPtELat), std::to_string(geoPtELon));
+        GeoPoint start = GeoPoint(geoPtSLat, geoPtSLon);
+        GeoPoint end = GeoPoint(geoPtELat, geoPtELon);
         
+        //add to pointToStreet
+        pointToStreet.insert(start.to_string() + end.to_string(), streetName);
+        
+        //check if the street's in the map & add it in if its not
         if(pointToNode.find(start.to_string()) == nullptr){
             pointToNode.insert(start.to_string(), graphNode{"street", streetName, vector<graphNode*>(), start});
         }
@@ -49,31 +53,39 @@ bool GeoDatabase::load(const std::string& map_data_file){
         else{
             //create midpoint
             GeoPoint midpt = midpoint(start, end);
+            
+            //add midpt to pointToStreet
+            pointToStreet.insert(midpt.to_string(), streetName);
+            
             //add midpt to hashmap
-            pointToNode.insert(midpt.to_string(), graphNode{"midpoint", "", vector<graphNode*>(), midpt});
-            graphNode* midPt = pointToNode.find(midpt.to_string());
+            pointToNode.insert(midpt.to_string(), graphNode{"midpoint", "a path", vector<graphNode*>(), midpt});
+            graphNode* midptPt = pointToNode.find(midpt.to_string());
             //connect start/mid/end
-            startPt->connectedPts.push_back(midPt);
-            endPt->connectedPts.push_back(midPt);
-            midPt->connectedPts.push_back(startPt);
-            midPt->connectedPts.push_back(endPt);
+            startPt->connectedPts.push_back(midptPt);
+            endPt->connectedPts.push_back(midptPt);
+            midptPt->connectedPts.push_back(startPt);
+            midptPt->connectedPts.push_back(endPt);
             
             for(; poiCt > 0; poiCt--){
                 //read in name, lat, long
-                std::string name;
-                double poiLat, poiLon;
+                string poiName;
+                string poiLat, poiLon;
                 
-                std::getline(infile, name, '|');
+                std::getline(infile, poiName, '|');
                 
                 infile >> poiLat >> poiLon;
                 infile.ignore(10000, '\n');
                 
                 //add POI and connect POI to midpoint & vice versa
-                GeoPoint poi = GeoPoint(std::to_string(poiLat), std::to_string(poiLon));
-                pointToNode.insert(poi.to_string(), graphNode{"POI", name, vector<graphNode*>(), poi});
+                GeoPoint poi = GeoPoint(poiLat, poiLon);
+                pointToNode.insert(poi.to_string(), graphNode{"POI", poiName, vector<graphNode*>(), poi});
                 graphNode* poiPt = pointToNode.find(poi.to_string());
-                poiPt->connectedPts.push_back(midPt);
-                midPt->connectedPts.push_back(poiPt);
+                poiPt->connectedPts.push_back(midptPt);
+                midptPt->connectedPts.push_back(poiPt);
+                
+                //add POI to poiToLoc
+                poiToLoc.insert(poiName, poi);
+                pointToStreet.insert(poi.to_string(), "a path");
             }
         }
         
@@ -82,12 +94,37 @@ bool GeoDatabase::load(const std::string& map_data_file){
     return true;
 }
 
-/*
- bool GeoDatabase::load(const std::string& map_data_file){ }
- 
- bool GeoDatabase::get_poi_location(const std::string& poi, GeoPoint& point) const{ }
- 
- std::vector<GeoPoint> GeoDatabase::get_connected_points(const GeoPoint& pt) const { }
- 
- std::string GeoDatabase::get_street_name(const GeoPoint& pt1, const GeoPoint& pt2) const { }
- */
+bool GeoDatabase::get_poi_location(const std::string& poi, GeoPoint& point) const{
+    if(poiToLoc.find(poi) == nullptr){
+        return false;
+    }
+    
+    point = *poiToLoc.find(poi);
+    return true;
+}
+
+std::string GeoDatabase::get_street_name(const GeoPoint& pt1, const GeoPoint& pt2) const{
+    if(pointToStreet.find(pt1.to_string() + pt2.to_string()) != nullptr)
+        return *pointToStreet.find(pt1.to_string() + pt2.to_string());
+    else if(pointToStreet.find(pt2.to_string() + pt1.to_string()) != nullptr)
+        return *pointToStreet.find(pt2.to_string() + pt1.to_string());
+    if(pointToStreet.find(pt1.to_string()) != nullptr) {}
+       // return *pointToStreet.find(pt1.to_string());
+    if(pointToStreet.find(pt2.to_string()) != nullptr)
+        return *pointToStreet.find(pt2.to_string());
+    else return "";
+    return "";
+}
+
+std::vector<GeoPoint> GeoDatabase::get_connected_points(const GeoPoint& pt) const
+{
+    const graphNode *ptVal = pointToNode.find(pt.to_string());
+    const std::vector<graphNode*> connectedPoints = ptVal->connectedPts;
+    std::vector<GeoPoint> geoPtVector;
+    for(vector<graphNode*>::const_iterator it = connectedPoints.begin(); it != connectedPoints.end(); it++){
+        geoPtVector.push_back((*it)->val);
+    }
+    return geoPtVector;
+}
+
+

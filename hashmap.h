@@ -34,8 +34,13 @@ public:
     // If no association exists with the given key, return nullptr; otherwise,
     // return a pointer to the value associated with that key. This pointer can be
     // used to examine that value or modify it directly within the map.
-    T* find(const std::string& key);
+     const T* find(const std::string& key) const;
     
+    T* find(const std::string& key)
+    {
+        const auto& hm = *this;
+        return const_cast<T*>(hm.find(key));
+    }
     // Defines the bracket operator for HashMap, so you can use your map like this:
     // your_map["david"] = 2.99;
     // If the key does not exist in the hashmap, this will create a new entry in
@@ -56,6 +61,7 @@ public:
         }
         return it->second;
     }
+    
     
 private:
     struct Node{
@@ -91,15 +97,13 @@ private:
 };
 
 template <typename T>
-T* HashMap<T>::find(const std::string& key)
+const T* HashMap<T>::find(const std::string& key) const
 {
     int index = hash(key) % buckets.size();
     
     if(buckets[index].empty()) return nullptr;
-    
-    typename std::list<Node>::iterator it;
         
-    for(it = buckets[index].begin(); it != buckets[index].end(); it++){
+    for(typename std::list<Node>::const_iterator it = buckets[index].begin(); it != buckets[index].end(); it++){
         if(it->first == key){
             return &(it->second);
         }
