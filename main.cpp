@@ -17,7 +17,7 @@ using namespace std;
 
 int main(){
     GeoDatabase gdb = GeoDatabase();
-    gdb.load("/Users/carolinewei/Downloads/mapdata.txt");
+    gdb.load("mapdata.txt");
     /*
     GeoPoint p1("34.0601422", "-118.4468929");
         GeoPoint p2("34.0600768", "-118.4467216");
@@ -53,16 +53,16 @@ int main(){
     assert(gdb.get_street_name(p6, p5) == "Kinross Avenue"); // writes "Kinross Avenue
     
     //cout<<"check connected points:"<<endl;
-    
+  /*
     std::vector<GeoPoint> pts = gdb.get_connected_points(GeoPoint("34.0736122", "-118.4927669"));
-    /*
+    
     if (pts.empty())
       cout << "There are no points connected to your specified point\n";
   else {
   for (const auto p: pts)
         cout << p.sLatitude << ", "  << p.sLongitude << endl;
     }
-     */
+     
     
     cout << pts.size()<<endl;
       if (pts.empty())
@@ -71,7 +71,31 @@ int main(){
     for (const auto p: pts)
           cout << p.sLatitude << ", "  << p.sLongitude << endl;
       }
+    */
     
+    Router router(gdb);
+    GeoPoint g1("34.0723599",  "-118.3961017");
+    GeoPoint g2("34.0752440", "-118.3965515");
+    std::vector<GeoPoint> pts = router.route(g1, g2);
+    
+    for (const auto p: pts)
+          cout << p.sLatitude << ", "  << p.sLongitude << endl;
+      
+    GeoPoint p10("34.0601422", "-118.4468929");
+        GeoPoint p11("34.0600768", "-118.4467216");
+        GeoPoint g3("34.0736888", "-118.4714917");
+        GeoPoint g4("34.0748450", "-118.4713112");
+        std::vector<GeoPoint> route1 = router.route(g3, g4);
+        std::string route1answer[8] = {"34.0736888,-118.4714917","34.0738333,-118.4713545","34.0739511,-118.4712176","34.0740134,-118.4711804","34.0740905,-118.4711684","34.0745130,-118.4711903","34.0746800,-118.4712360","34.0748450,-118.4713112"};
+        for (int i = 0; i<8; i++){
+            assert(route1[i].to_string() == route1answer[i]);
+        }
+        
+        std::string route2answer[2] = {"34.0601422,-118.4468929", "34.0600768,-118.4467216"};
+        std::vector<GeoPoint> route2 = router.route(p10, p11);
+        for (int i = 0; i<2; i++){
+            assert(route2[i].to_string() == route2answer[i]);
+        }
     cout<<"finished"<<endl;
 
 }

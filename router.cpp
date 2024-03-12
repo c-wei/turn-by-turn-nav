@@ -3,41 +3,59 @@ Router::Router(const GeoDatabaseBase& geo_db) { m_gdb = &geo_db; }
 Router::~Router() { }
 
 std::vector<GeoPoint> Router::route(const GeoPoint& pt1, const GeoPoint& pt2) const {
-    std::vector<AStarNode> possPaths;
-    std::vector<GeoPoint> toVisit;
-    HashMap<GeoPoint> visitedPoints;
-    AStarNode slow = {GeoPoint(), 0, 0};
+    std::priority_queue<AStarNode, std::vector<AStarNode>, compare> possPaths;    //open list
+    std::vector<GeoPoint> toVisit;           //holds the children/connected points of a parent
+    HashMap<AStarNode> visitedPoints;         //closed list
+    std::vector<GeoPoint> shortestRoute;
     
     AStarNode n1 = {pt1, distance_earth_miles(pt1, pt2), 0};
-    possPaths.push_back(n1);
+    possPaths.push(n1);
     
+    AStarNode frontNode;
     while(!possPaths.empty()){
-        AStarNode frontNode = possPaths[possPaths.size() - 1];
-        possPaths.pop_back();
+        frontNode = possPaths.top();
+        possPaths.pop();
         
-        //frontNode.node.get_connected_points() to look @ children
+        //check if current node is the goal point
+        if(frontNode.geoPt.to_string() == pt2.to_string())
+            break;
+        
+        AStarNode *dup = visitedPoints.find(frontNode.geoPt.to_string());
+        if(dup != nullptr){
+            if(dup -> lengthToNode < frontNode.lengthToNode ) continue;
+        }
+        //otherwise visit the node's connected points
         std::vector<GeoPoint> toVisit = m_gdb->get_connected_points(frontNode.geoPt);
         for(std::vector<GeoPoint>::const_iterator it = toVisit.begin(); it != toVisit.end(); it++){
-            if(it->to_string() == pt2.to_string()) { 
-                // reached end
-                possPaths.clear();
-                break;
+            double heuristicNum = distance_earth_miles(*it, pt2);
+            double pathLength = frontNode.lengthToNode + distance_earth_miles(*it, frontNode.geoPt);
+            AStarNode addMe = {*it, heuristicNum, pathLength};
+            
+            possPaths.push(addMe);
+            
+            AStarNode *foundVal = visitedPoints.find(addMe.geoPt.to_string());
+            if(foundVal != nullptr && foundVal->lengthToNode > addMe.lengthToNode){
+                visitedPoints.insert(addMe.geoPt.to_string(), {frontNode.geoPt, addMe.heuristicVal, addMe.lengthToNode});
             }
-            double aStarNum = distance_earth_miles(*it, pt2);
-            double pathLength = distance_earth_miles(*it, frontNode.geoPt);
-            AStarNode addMe = {*it, aStarNum, pathLength};
-            std::vector<AStarNode>::const_iterator index = possPaths.begin() + findLeastIndex(addMe, possPaths);
-            possPaths.insert(index, addMe);
+            else if(foundVal == nullptr){
+                visitedPoints.insert(addMe.geoPt.to_string(), {frontNode.geoPt, addMe.heuristicVal, addMe.lengthToNode});
+            }
         }
-        
-        //TODO: UPDATE THIS FOR WHEN THERE IS ANOTHER ONE THAT HAS SMALLER VALUE
-        visitedPoints.insert(frontNode.geoPt.to_string(), frontNode.geoPt);
-        
-        //TODO: THIS IS WRONG
-        slow = frontNode;
     }
     
-    return std::vector<GeoPoint>();
+    if(frontNode.geoPt.to_string() != pt2.to_string()){
+        return std::vector<GeoPoint>();
+    }
+    
+    while(frontNode.geoPt.to_string() != pt1.to_string()){
+        shortestRoute.insert(shortestRoute.begin(), frontNode.geoPt);
+        AStarNode *parent = visitedPoints.find(frontNode.geoPt.to_string());
+        frontNode = *parent;
+    }
+    
+    shortestRoute.insert(shortestRoute.begin(), frontNode.geoPt);
+    return shortestRoute;
+    
 }
 
 

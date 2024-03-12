@@ -2,7 +2,6 @@
 #define geodb_h
 #include "base_classes.h"
 #include "geopoint.h"
-//correct?
 #include "hashmap.h"
 #include <string>
 #include <vector>
