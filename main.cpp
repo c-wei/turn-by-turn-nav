@@ -1,4 +1,4 @@
-#include <cstdio>
+/*#include <cstdio>
 #include <iomanip>
 #include <iostream>
 #include <map>
@@ -16,9 +16,10 @@
 using namespace std;
 
 int main(){
+    
     GeoDatabase gdb = GeoDatabase();
     gdb.load("mapdata.txt");
-    /*
+    
     GeoPoint p1("34.0601422", "-118.4468929");
         GeoPoint p2("34.0600768", "-118.4467216");
         assert(gdb.get_street_name(p1, p2)=="a path");
@@ -27,7 +28,7 @@ int main(){
         GeoPoint geopoints[4] = {GeoPoint("34.0602175","-118.4464952"), GeoPoint("34.0599361","-118.4469479"), GeoPoint("34.0601422","-118.4468929"), GeoPoint("34.0591552","-118.4463759")};
         GeoPoint p = GeoPoint("34.0600768", "-118.4467216");
         std::vector<GeoPoint> pts = gdb.get_connected_points(p);
-    */
+    
     GeoPoint poiPoint;
     gdb.get_poi_location("Ackerman Union", poiPoint);
     assert(poiPoint.to_string() == "34.0705851,-118.4439429");
@@ -53,7 +54,7 @@ int main(){
     assert(gdb.get_street_name(p6, p5) == "Kinross Avenue"); // writes "Kinross Avenue
     
     //cout<<"check connected points:"<<endl;
-  /*
+  
     std::vector<GeoPoint> pts = gdb.get_connected_points(GeoPoint("34.0736122", "-118.4927669"));
     
     if (pts.empty())
@@ -71,7 +72,7 @@ int main(){
     for (const auto p: pts)
           cout << p.sLatitude << ", "  << p.sLongitude << endl;
       }
-    */
+    
     
     Router router(gdb);
     GeoPoint g1("34.0723599",  "-118.3961017");
@@ -99,6 +100,7 @@ int main(){
     cout<<"finished"<<endl;
 
 }
+*/
     /*
     HashMap<int> hashmap(0.5);
     std::string keys[10] = {"ahello", "bhello", "chello", "dhello", "ehello", "fhello","ghello", "hhello", "ihello", "jhello"};
@@ -138,8 +140,22 @@ double* davidsGPA = nameToGPA.find("David");
      
 }
  */
-/*
-void print_tour(vector<TourCommand> &tcs)
+
+#include <cstdio>
+#include <iomanip>
+#include <iostream>
+#include <map>
+#include <vector>
+#include <cassert>
+#include "geodb.h"
+#include "router.h"
+#include "stops.h"
+#include "tourcmd.h"
+#include "tour_generator.h"
+
+using namespace std;
+
+void print_tour(vector<TourCommand>& tcs)
 {
     double total_dist = 0;
     std::string direction;
@@ -149,7 +165,6 @@ void print_tour(vector<TourCommand> &tcs)
 
     for (size_t i = 0; i < tcs.size(); ++i)
     {
-        // cout << tcs[i] << endl;
         if (tcs[i].get_command_type() == TourCommand::commentary)
         {
             cout << "Welcome to " << tcs[i].get_poi() << "!\n";
@@ -165,8 +180,8 @@ void print_tour(vector<TourCommand> &tcs)
             if (direction.empty())
                 direction = tcs[i].get_direction();
             street_distance += tcs[i].get_distance();
-            if (i < tcs.size() - 1 && tcs[i + 1].get_command_type() == TourCommand::proceed
-                && tcs[i + 1].get_street() == tcs[i].get_street() && tcs[i].get_street() != GeoDatabase::kPathString)
+            if (i+1 < tcs.size() && tcs[i+1].get_command_type() == TourCommand::proceed
+                && tcs[i+1].get_street() == tcs[i].get_street() && tcs[i].get_street() != "a path")
             {
                 continue;
             }
@@ -180,20 +195,20 @@ void print_tour(vector<TourCommand> &tcs)
     cout << "Your tour has finished!\n";
     cout << "Total tour distance: " << std::fixed << std::setprecision(3) << total_dist << " miles\n";
 }
-
+/*
 int main(int argc, char *argv[])
 {
     if (argc != 3)
     {
-        cout << "usage: BruinNav mapdata.txt stops.txt\n";
-        return -1;
+        cout << "usage: BruinTour mapdata.txt stops.txt\n";
+        return 1;
     }
 
     GeoDatabase geodb;
     if (!geodb.load(argv[1]))
     {
         cout << "Unable to load map data: " << argv[1] << endl;
-        return -1;
+        return 1;
     }
 
     Router router(geodb);
@@ -203,16 +218,72 @@ int main(int argc, char *argv[])
     if (!stops.load(argv[2]))
     {
         cout << "Unable to load tour data: " << argv[2] << endl;
-        return -1;
+        return 1;
     }
 
-    std::cout << "\nRouting...\n\n";
+    std::cout << "Routing...\n\n";
 
-    string error;
     vector<TourCommand> tcs = tg.generate_tour(stops);
     if (tcs.empty())
         cout << "Unable to generate tour!\n";
     else
         print_tour(tcs);
+}*/
+int main(){
+    GeoDatabase gdb = GeoDatabase();
+    gdb.load("/Users/carolinewei/Downloads/mapdata.txt");
+    
+    GeoPoint poiPoint;
+    gdb.get_poi_location("Ackerman Union", poiPoint);
+    assert(poiPoint.to_string() == "34.0705851,-118.4439429");
+    
+    GeoPoint poiPoint2;
+    gdb.get_poi_location("Diddy Riese", poiPoint2);
+    assert(poiPoint2.to_string() == "34.0630614,-118.4468781");
+    std::cout<<"finished"<<std::endl;
+    
+    
+    GeoPoint p1("34.0601422", "-118.4468929");
+    GeoPoint p2("34.0600768", "-118.4467216");
+    assert(gdb.get_street_name(p1, p2)=="a path");
+    assert(gdb.get_street_name(p2, p1)=="a path");
+    
+    GeoPoint geopoints[4] = {GeoPoint("34.0602175","-118.4464952"), GeoPoint("34.0599361","-118.4469479"), GeoPoint("34.0601422","-118.4468929"), GeoPoint("34.0591552","-118.4463759")};
+    GeoPoint p = GeoPoint("34.0600768", "-118.4467216");
+    std::vector<GeoPoint> pts = gdb.get_connected_points(p);
+    for(int i = 0; i<4; i++){
+        assert(geopoints[i].to_string() == pts[i].to_string());
+    }
+    
+    Router router(gdb);
+    
+    GeoPoint g1("34.0736888", "-118.4714917");
+    GeoPoint g2("34.0748450", "-118.4713112");
+    std::string route1answer[8] = {"34.0736888,-118.4714917","34.0738333,-118.4713545","34.0739511,-118.4712176","34.0740134,-118.4711804","34.0740905,-118.4711684","34.0745130,-118.4711903","34.0746800,-118.4712360","34.0748450,-118.4713112"};
+    std::vector<GeoPoint> route1 = router.route(g1, g2);
+    for (int i = 0; i<8; i++){
+        assert(route1[i].to_string() == route1answer[i]);
+    }
+    
+    std::string route2answer[2] = {"34.0601422,-118.4468929", "34.0600768,-118.4467216"};
+    std::vector<GeoPoint> route2 = router.route(p1, p2);
+    for (int i = 0; i<2; i++){
+        assert(route2[i].to_string() == route2answer[i]);
+    }
+    
+    GeoPoint g3("34.0723599",  "-118.3961017");
+    GeoPoint g4("34.0752440", "-118.3965515");
+    std::vector<GeoPoint> route3 = router.route(g3, g4);
+    std::string route3answer[5] = {"34.0723599,-118.3961017","34.0728209,-118.3961093","34.0734602,-118.3961197","34.0743669,-118.3961152","34.0752440,-118.3965515"};
+        
+    for (int i = 0; i<5; i++){
+        assert(route3[i].to_string() == route3answer[i]);
+    }
+    
+    Stops stops;
+    stops.load("/Users/carolinewei/Desktop/stops.txt");
+    
+    TourGenerator tour_gen(gdb, router);
+    std::vector<TourCommand> commands = tour_gen.generate_tour(stops);
+    print_tour(commands);
 }
-*/

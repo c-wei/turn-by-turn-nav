@@ -5,6 +5,7 @@ TourGenerator::TourGenerator(const GeoDatabaseBase& geodb, const RouterBase& rou
     m_router = &router;
 }
 TourGenerator::~TourGenerator() {}
+
 std::vector<TourCommand> TourGenerator::generate_tour(const Stops &stops) const{
     std::vector<TourCommand> instructions;
     std::vector<GeoPoint> path;
@@ -25,11 +26,19 @@ std::vector<TourCommand> TourGenerator::generate_tour(const Stops &stops) const{
             for(std::vector<GeoPoint>::const_iterator it = path.begin(); it != path.end()-1; it++){
                 TourCommand proceed = TourCommand();
                 proceed.init_proceed(getLineAngle(*it, *(it+1)), gdb->get_street_name(*it, *(it+1)), distance_earth_miles(*it, *(it+1)), *it, *(it+1));
+                instructions.push_back(proceed);
+                if(it+2 != path.end()){
+                    if(gdb->get_street_name(*it, *(it+1)) != gdb->get_street_name(*(it+1), *(it+2))){
+                        double turnAngle = angle_of_turn(*it, *(it+1), *(it+2));
+                        if(turnAngle >= 1 && turnAngle <= 359){
+                            TourCommand turn = TourCommand();
+                            turn.init_turn(getTurnValue(turnAngle), gdb->get_street_name(*(it+1), *(it+2)));
+                            instructions.push_back(turn);
+                        }
+                    }
+                }
             }
         }
-        
-        
-        
         i++;
     }
     

@@ -26,9 +26,13 @@ std::vector<GeoPoint> Router::route(const GeoPoint& pt1, const GeoPoint& pt2) co
         }
         //otherwise visit the node's connected points
         std::vector<GeoPoint> toVisit = m_gdb->get_connected_points(frontNode.geoPt);
+        //for(GeoPoint &g : toVisit)
         for(std::vector<GeoPoint>::const_iterator it = toVisit.begin(); it != toVisit.end(); it++){
+            //double heuristicNum = distance_earth_miles(g, pt2);
             double heuristicNum = distance_earth_miles(*it, pt2);
+            //double pathLength = frontNode.lengthToNode + distance_earth_miles(g, frontNode.geoPt);
             double pathLength = frontNode.lengthToNode + distance_earth_miles(*it, frontNode.geoPt);
+            //AStarNode addMe = {g, heuristicNum, pathLength};
             AStarNode addMe = {*it, heuristicNum, pathLength};
             
             possPaths.push(addMe);
