@@ -127,9 +127,7 @@ std::vector<GeoPoint> GeoDatabase::get_connected_points(const GeoPoint& pt) cons
     const std::vector<graphNode*> connectedPoints = ptVal->connectedPts;
     std::vector<GeoPoint> geoPts;
     
-    //for(graphNode* &gN : connectedPoints){
     for(vector<graphNode*>::const_iterator it = connectedPoints.begin(); it != connectedPoints.end(); it++){
-        //geoPts.push_back(gN->val);
         geoPts.push_back((*it)->val);
     }
     return geoPts;

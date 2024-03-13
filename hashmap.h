@@ -17,12 +17,11 @@ public:
     //TODO: IMPLEMENT
     // destructor; deletes all of the items in the hashmap
     ~HashMap(){
-        //for(int i : buckets.size())
         for(int i = 0; i < buckets.size(); i++){
-            //for(Node* &it : buckets[i])
-            for(typename std::list<Node*>::iterator it = buckets[i].begin(); it != buckets[i].end(); it++)
-                //delete it;
-                delete (*it);
+            for(Node* &it : buckets[i])
+            //for(typename std::list<Node*>::iterator it = buckets[i].begin(); it != buckets[i].end(); it++)
+                delete it;
+                //delete (*it);
         }
     }
     
@@ -91,17 +90,17 @@ private:
     void rehash(){
         std::vector<std::list<Node*>> newBuckets (buckets.size()*2);
         
-        //for(int i : buckets.size())
+        //for(int i : buckets.size()){
         for(int i = 0; i < buckets.size(); i++){
             if(!buckets[i].empty()){
-                //for(Node* &it : buckets[i]){
-                for(typename std::list<Node*>::iterator it = buckets[i].begin(); it != buckets[i].end(); it++){
-                    //int index = hash(it->first) % newBuckets.size();
-                    int index = hash((*it)->first) % newBuckets.size();
-                    //newBuckets[index].push_back(it);
-                    newBuckets[index].push_back(*it);
-                    //it = nullptr
-                    *it = nullptr;
+                for(Node* &it : buckets[i]){
+                //for(typename std::list<Node*>::iterator it = buckets[i].begin(); it != buckets[i].end(); it++){
+                    int index = hash(it->first) % newBuckets.size();
+                    //int index = hash((*it)->first) % newBuckets.size();
+                    newBuckets[index].push_back(it);
+                    //newBuckets[index].push_back(*it);
+                    it = nullptr;
+                    //*it = nullptr;
                 }
             }
         }
@@ -116,11 +115,8 @@ const T* HashMap<T>::find(const std::string& key) const
     
     if(buckets[index].empty()) return nullptr;
 
-    //for(Node* &it : buckets[index]){
     for(typename std::list<Node*>::const_iterator it = buckets[index].begin(); it != buckets[index].end(); it++){
-        //if(it->first == key)
         if((*it)->first == key){
-            //return &(it->second);
             return &((*it)->second);
         }
     }

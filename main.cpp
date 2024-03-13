@@ -231,7 +231,7 @@ int main(int argc, char *argv[])
 }*/
 int main(){
     GeoDatabase gdb = GeoDatabase();
-    gdb.load("/Users/carolinewei/Downloads/mapdata.txt");
+    gdb.load("mapdata.txt");
     
     GeoPoint poiPoint;
     gdb.get_poi_location("Ackerman Union", poiPoint);
@@ -281,7 +281,7 @@ int main(){
     }
     
     Stops stops;
-    stops.load("/Users/carolinewei/Desktop/stops.txt");
+    stops.load("stops.txt");
     
     TourGenerator tour_gen(gdb, router);
     std::vector<TourCommand> commands = tour_gen.generate_tour(stops);
